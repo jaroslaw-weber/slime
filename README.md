@@ -1,25 +1,25 @@
-## Slime
+# Slime
 
-# handlebars & json based static site generator library.
+## handlebars & json based static site generator library.
 
-# Why slime
+## Why slime
 Because it is slim(e) and flexible (like a slime...)
 
-# What?
+## What?
 template + data = static page!
 
-# How
+## How
 - handlebars
 - json
 - few simple helpers
 
-# Why?
+## Why?
 - more flexible design - can reuse/manipulate data by merging or modyfing loaded json
 - modular - support for partial templates
 - easy to learn - using already popular json and handlebars combination
 - easy to start - copy example and edit json/handlebar files to create one static page without touching rust code
 
-# Show me
+## Show me
 
 ```
 extern crate slime;
@@ -35,7 +35,7 @@ fn main() {
 
 ```
 
-# So what is going on?
+## So what is going on?
 
 ```
 let hb = load_all().expect("failed to get templates");
@@ -54,6 +54,6 @@ generate(&hb, "index", &index_data, "index").expect("failed to generate html");
 ```
 Smash the data into the template.
 
-# So what next?
+## So what next?
 Maybe more high level api?
 
