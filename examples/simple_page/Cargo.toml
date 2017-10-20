@@ -1,0 +1,7 @@
+[package]
+authors = ["Jaroslaw Weber<jaroslaw.weber@gmail.com>"]
+name = "simple_page_example"
+version = "0.1.0"
+
+[dependencies]
+slime = { path = "../.." }
