@@ -1,6 +1,7 @@
 # Slime
+[![Build Status](https://travis-ci.org/jaroslaw-weber/slime.svg?branch=master)](https://travis-ci.org/jaroslaw-weber/slime)
 
-## handlebars & json based static site generator library.
+handlebars & json based static site generator library.
 
 ## Why slime
 Because it is slim(e) and flexible (like a slime...)
