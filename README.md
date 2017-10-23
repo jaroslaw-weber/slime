@@ -1,7 +1,7 @@
 # Slime
 [![Build Status](https://travis-ci.org/jaroslaw-weber/slime.svg?branch=master)](https://travis-ci.org/jaroslaw-weber/slime)
 
-handlebars & json based static site generator library.
+Handlebars based flexible static site generator library
 
 ## Why slime
 Because it is slim(e) and flexible (like a slime...)
@@ -22,16 +22,45 @@ template + data = static page!
 
 ## Show me
 
+Folder structure:
+
+```
+- generated (generated html files)
+- data (data to insert into templates)
+ - index.json
+- templates
+ - index.hbs (handlebar templates)
+
+```
+
+Code:
+
 ```
 extern crate slime;
-use slime::data::load_json;
-use slime::html::generate;
-use slime::template::load_all;
+#[macro_use]
+extern crate serde_json;
+use slime::Slime;
+use slime::DataFormat;
+
 
 fn main() {
-    let hb = load_all().expect("failed to get templates");
-    let index_data = load_json("index.json").expect("failed to get index data");
-    generate(&hb, "index", &index_data, "index").expect("failed to generate html");
+
+    //create new Slime wrapper
+    let mut s = Slime::new();
+
+    //link "index.hbs" with "index.json"
+    s.add_simple("index", DataFormat::Json).expect("failed to add page");
+
+    let mut some_data = s.load_data("index", DataFormat::Json).expect("failed to load json data");
+
+    //manipulate loaded data
+    some_data["test"]=json!("changed");
+
+    //link "index.hbs" with some manipulated data and generate "index2.html" (only save settings)
+    s.add("index", &some_data, "index2");
+
+    //try to generate a website
+    s.run().expect("failed to generate website");
 }
 
 ```
@@ -39,22 +68,34 @@ fn main() {
 ## So what is going on?
 
 ```
-let hb = load_all().expect("failed to get templates");
+let mut s = Slime::new();
 ```
-Load templates from "template" folder.
+Creates new wrapper
 
 
 ```
-let index_data = load_json("index.json").expect("failed to get index data");
+s.add_simple("index", DataFormat::Json)
 ```
-Load data from "data" folder.
+Links "index.hbs" with "index.json" and register new page inside wrapper
 
 
 ```
-generate(&hb, "index", &index_data, "index").expect("failed to generate html");
+let mut some_data = s.load_data("index", DataFormat::Json)
 ```
-Smash the data into the template.
+Load some other data
+
+```
+s.add("index", &some_data, "index2");
+```
+Register "index.hbs" with passed data and sets output path to "index2.html"
+
+```
+s.run();
+```
+Generate website using registered data and paths.
+
 
 ## So what next?
-Maybe more high level api?
-
+- [ ] stabilize api
+- [ ] allow toml format
+- [ ] example how to create nice websites with bulma

@@ -12,9 +12,8 @@ pub fn read_file(relative_path: &str) -> Result<String, Box<Error>> {
     file.read_to_string(&mut contents)?;
     Ok(contents)
 }
-pub fn load_json(data_folder_path: &str) -> Result<SerdeJson, Box<Error>> {
-    let data_files_path = "data";
-    let path = format!("{}/{}", data_files_path, data_folder_path);
+pub fn load_json(data_folder_path: &str, data_path: &str) -> Result<SerdeJson, Box<Error>> {
+    let path = format!("{}/{}.json", data_folder_path, data_path);
     let as_string = read_file(&path)?;
     let as_json: SerdeJson = serde_json::from_str(&as_string)?;
     Ok(as_json)

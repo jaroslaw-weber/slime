@@ -1,15 +1,22 @@
 extern crate slime;
-use slime::data::load_json;
-use slime::html::generate;
-use slime::template::load_all;
+#[macro_use]
+extern crate serde_json;
+use slime::Slime;
+use slime::DataFormat;
+
 
 fn main() {
-    //load all templates in template folder
-    let hb = load_all().expect("failed to get templates");
-    //load data from relative path in data folder
-    let index_data = load_json("index.json").expect("failed to get index data");
-    //generate html file. arguments: handlebars, template name, data, generated file relative path
-    generate(&hb, "index", &index_data, "index").expect("failed to generate html");
+    //create new Slime wrapper
+    let mut s = Slime::new();
+    //link "index.hbs" with "index.json"
+    s.add_simple("index", DataFormat::Json).expect("failed to add page");
+    let mut some_data = s.load_data("index", DataFormat::Json).expect("failed to load json data");
+    //manipulate loaded data
+    some_data["test"]=json!("changed");
+    //link "index.hbs" with some manipulated data and generate "index2.html" (only save settings)
+    s.add("index", &some_data, "index2");
+    //try to generate a website
+    s.run().expect("failed to generate website");
 }
 
 
