@@ -1,5 +1,8 @@
 # Slime
 [![Build Status](https://travis-ci.org/jaroslaw-weber/slime.svg?branch=master)](https://travis-ci.org/jaroslaw-weber/slime)
+[![Latest Version]][crates.io]
+[Latest Version]: https://img.shields.io/crates/v/slime.svg
+[crates.io]: https://crates.io/crates/slime
 
 Handlebars based flexible static site generator library
 
