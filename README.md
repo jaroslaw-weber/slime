@@ -100,6 +100,12 @@ Generate website using registered data and paths.
 
 
 ## So what next?
-- [ ] stabilize api
+- [ ] simplify (remove DataFormat from public api) & stabilize api
+- [ ] improve error messages (implement new error?)
 - [ ] allow toml format
-- [ ] example how to create nice websites with bulma
+- [ ] add curl installation for one page project
+- [ ] example how to create nice websites with bulma (and other css frameworks) & publish it on github pages, also add fallback css files
+- [ ] add tests
+- [ ] write tutorial and use github pages to display it
+- [ ] add links to projects using slime to README file
+- [ ] add more examples
