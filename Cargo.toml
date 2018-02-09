@@ -2,7 +2,7 @@
 authors = ["Jaroslaw Weber<jaroslaw.weber@gmail.com>"]
 name = "slime"
 version = "0.3.0"
-description = "handlebars base simple and flexible static page generator library"
+description = "handlebars and toml based simple and flexible static page generator library"
 license = "MIT"
 
 [dependencies]
