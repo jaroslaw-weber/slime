@@ -4,7 +4,6 @@ name = "simple_page_example"
 version = "0.1.0"
 
 [dependencies]
-serde_json = "1.0.4"
 
 [dependencies.slime]
 path = "../.."

@@ -1,28 +1,28 @@
-use std::fs::File;
-use std::io::prelude::*;
-use serde_json::Value as SerdeJson;
 use handlebars::Handlebars;
 use std::error::Error;
+use fs_extra::file::*;
+use serde::ser::Serialize;
 
+/// Write html file
 pub fn generate_rendered_html(
-    rendered_recipe: &str,
+    content: &str,
     folder_path: &str,
-    relative_path: &str,
+    file_name: &str,
 ) -> Result<(), Box<Error>> {
-    let full_path = format!("{}/{}.html", folder_path, relative_path);
-    let mut file = File::create(full_path)?;
-    file.write_all(rendered_recipe.as_bytes())?;
+    let full_path = format!("{}/{}.html", folder_path, file_name);
+    write_all(full_path, content)?;
     Ok(())
 }
 
-pub fn generate(
+/// Generate html file
+pub fn generate<T: Serialize>(
     hb: &Handlebars,
     template_name: &str,
-    data: &SerdeJson,
+    data: &T,
     folder_path: &str,
-    path: &str,
+    file_name: &str,
 ) -> Result<(), Box<Error>> {
-    println!("generating: {}", path);
+    println!("generating: {}", file_name);
     let rendered = hb.render(template_name, data)?;
-    generate_rendered_html(&rendered, folder_path, path)
+    generate_rendered_html(&rendered, folder_path, file_name)
 }

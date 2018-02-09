@@ -15,7 +15,7 @@ template + data = static page!
 
 ## How
 - handlebars
-- json
+- toml/json
 - few simple helpers
 
 ## Why?
@@ -24,6 +24,15 @@ template + data = static page!
 - easy to learn - using already popular json and handlebars combination
 - easy to start - copy example and edit json/handlebar files to create one static page without touching rust code
 
+## Installation
+
+Create new binary crate.
+Run:
+```
+curl -s https://raw.githubusercontent.com/jaroslaw-weber/slime/master/init_slime.sh | bash
+```
+(setup folders and deploy scripts for github+travis)
+
 ## Show me
 
 Folder structure:
@@ -31,9 +40,11 @@ Folder structure:
 ```
 - generated (generated html files)
 - data (data to insert into templates)
- - index.json
+ - index.toml
 - templates
  - index.hbs (handlebar templates)
+deploy.sh (deploying generated html files to github pages)
+.travis.yml (travis build script)
 
 ```
 
@@ -41,30 +52,21 @@ Code:
 
 ```
 extern crate slime;
-#[macro_use]
-extern crate serde_json;
 use slime::Slime;
-use slime::DataFormat;
-
 
 fn main() {
+    //create new wrapper
+    let s = Slime::default();
 
-    //create new Slime wrapper
-    let mut s = Slime::new();
+    //load data
+    let data1 = s.load_json_data("data1").expect("failed to load json data");
+    let data2 = s.load_toml_data("data2").expect("failed to load toml data");
 
-    //link "index.hbs" with "index.json"
-    s.add_simple("index", DataFormat::Json).expect("failed to add page");
-
-    let mut some_data = s.load_data("index", DataFormat::Json).expect("failed to load json data");
-
-    //manipulate loaded data
-    some_data["test"]=json!("changed");
-
-    //link "index.hbs" with some manipulated data and generate "index2.html" (only save settings)
-    s.add("index", &some_data, "index2");
-
-    //try to generate a website
-    s.run().expect("failed to generate website");
+    //generate html files
+    s.generate("index", "json_version", &data1)
+        .expect("failed to generate page with json data");
+    s.generate("index", "toml_version", &data2)
+        .expect("failed to generate page with toml data");
 }
 
 ```
@@ -72,40 +74,59 @@ fn main() {
 ## So what is going on?
 
 ```
-let mut s = Slime::new();
+let mut s = Slime::default();
 ```
-Creates new wrapper
+Create new wrapper.
 
 
 ```
-s.add_simple("index", DataFormat::Json)
+let data1 = s.load_json_data("data1").expect("failed to load json data");
+let data2 = s.load_toml_data("data2").expect("failed to load toml data");
 ```
-Links "index.hbs" with "index.json" and register new page inside wrapper
+Load some toml/json data from data folder.
 
 
 ```
-let mut some_data = s.load_data("index", DataFormat::Json)
+s.generate("index", "json_version", &data1)
+    .expect("failed to generate page with json data");
+s.generate("index", "toml_version", &data2)
+    .expect("failed to generate page with toml data");
 ```
-Load some other data
+Generate html files.
 
-```
-s.add("index", &some_data, "index2");
-```
-Register "index.hbs" with passed data and sets output path to "index2.html"
 
-```
-s.run();
-```
-Generate website using registered data and paths.
-
+## New features
+- installation script
+- reading toml files
+- simpler api
+- toml format
 
 ## So what next?
-- [ ] simplify (remove DataFormat from public api) & stabilize api
-- [ ] improve error messages (implement new error?)
-- [ ] allow toml format
-- [ ] add curl installation for one page project
-- [ ] example how to create nice websites with bulma (and other css frameworks) & publish it on github pages, also add fallback css files
+- [ ] slime binary mode (using slime library without writing rust code)
+- [ ] improve api
+- [ ] improve error messages (use failure crate)
+- [ ] example how to create nice websites with css frameworks
 - [ ] add tests
-- [ ] write tutorial and use github pages to display it
+- [ ] write tutorial
 - [ ] add links to projects using slime to README file
 - [ ] add more examples
+- [ ] add toml -> json conversion
+- [ ] improve installation script
+
+## Binary mode
+Generating page without writing rust code.
+(todo: not implemented yet)
+
+Install slime with
+```
+cargo install slime
+```
+Initialize project with
+```
+cargo slime --init
+```
+Put data in data folder.
+Put templates in template folder.
+Push everything to github.
+Setup travis and wait for build to finish.
+Your website will be generated and deployed automatically!

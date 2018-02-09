@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html>
-  <body>
-    {{test}}
-  </body>
+
+<body>
+  <h1>{{this.title}}</h1>
+  <h2>{{this.list_title}}</h2>
+
+  <ul>
+    {{#each this.list}}
+    <li>{{this}}</li>
+    {{/each}}
+  </ul>
+
+  <hr> Test text:
+  <br> {{test}}
+</body>
+
 </html>

@@ -1,0 +1,10 @@
+{
+    "test": "Some test value",
+    "title": "Simple website",
+    "list_title": "Supports:",
+    "list": [
+        "handlebars",
+        "json",
+        "toml"
+    ]
+}

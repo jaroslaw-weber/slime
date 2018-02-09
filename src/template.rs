@@ -2,15 +2,18 @@ use std::fs::read_dir;
 use handlebars::Handlebars;
 use std::path::Path;
 use std::error::Error;
+use Config;
 
-pub fn load_all() -> Result<Handlebars, Box<Error>> {
+/// Loading all templates from template folder
+pub fn load_all(config: &Config) -> Result<Handlebars, Box<Error>> {
     let mut handlebars = Handlebars::new();
-    register_all_templates(&mut handlebars)?;
+    register_all_templates(config, &mut handlebars)?;
     Ok(handlebars)
 }
 
-fn register_all_templates(handlebars: &mut Handlebars) -> Result<(), Box<Error>> {
-    let templates_path = "templates";
+/// register all templates from template folder to one Handlebars object
+fn register_all_templates(config: &Config, handlebars: &mut Handlebars) -> Result<(), Box<Error>> {
+    let templates_path = config.templates_path;
     let paths = read_dir(templates_path)?;
 
     for path in paths {
@@ -25,13 +28,15 @@ fn register_all_templates(handlebars: &mut Handlebars) -> Result<(), Box<Error>>
     Ok(())
 }
 
-// ./folder/filename.ext -> filename
+/// Get filename from path
+/// Example:
+/// ./folder/filename.ext -> filename
 fn path_to_filename(relative_path: &str) -> Result<String, Box<Error>> {
     let path = relative_path
-        .split("/")
+        .split('/')
         .last()
         .ok_or("failed to get filename")?
-        .split(".")
+        .split('.')
         .next()
         .ok_or("failed to get filename")?
         .to_string();

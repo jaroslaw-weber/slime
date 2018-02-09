@@ -1,103 +1,98 @@
+extern crate fs_extra;
 extern crate handlebars;
-#[macro_use]
+extern crate serde;
 extern crate serde_json;
+extern crate toml;
 use serde_json::value::Value as SerdeJson;
 use std::error::Error;
+use toml::Value as Toml;
+use serde::ser::Serialize;
 
 pub mod template;
 pub mod data;
 pub mod html;
 
-pub struct Slime<'a> {
-	config: Config<'a>,
-	pages: Vec<Page<'a>>,
-}
-struct Page<'a> {
-	template_name: &'a str,
-	data: SerdeJson,
-	generate_path: &'a str,
-}
+/// Rust library for fast prototyping and creating static websites.
+/// Use handlebars to handle html parts.
+/// Uses json and toml formats for data passed into templates.
+/// Flexible design allows to create any type of static website.
 
-pub enum DataFormat {
-	Json,
-	//Toml, //todo: support toml
+/// Creating new project:
+/// Create new binary crate with
+/// ```
+/// cargo new --bin crate_name
+/// ```
+/// Open crate folder and run
+/// curl -s https://raw.githubusercontent.com/jaroslaw-weber/slime/master/init_slime.sh | bash
+/// This will download deployment scripts and create some folders.
+/// It will also create example files.
+
+/// Wrapper for creating a static websites.
+/// Load templates and helps with loading and inserting data into templates.
+pub struct Slime<'a> {
+    config: Config<'a>,
 }
 
 impl<'a> Slime<'a> {
-	pub fn run(&self) -> Result<(), Box<Error>> {
-		let hb = template::load_all().unwrap();
-		for p in &self.pages {
-			html::generate(
-				&hb,
-				p.template_name,
-				&p.data,
-				self.config.generated_files_path,
-				p.generate_path,
-			)?;
-		}
-		Ok(())
-		//todo: mapping from config file
-	}
-	pub fn new() -> Slime<'a> {
-		Slime::new_with(Config::default())
-	}
-	pub fn new_with(config: Config<'a>) -> Slime<'a> {
-		Slime {
-			config: config,
-			pages: Vec::new(),
-		}
-	}
-	pub fn add_simple(
-		&mut self,
-		template_and_data_file_name: &'a str,
-		data_format: DataFormat,
-	) -> Result<(), Box<Error>> {
-		let data = data::load_json(&self.config.data_folder_path, template_and_data_file_name)?;
-		let p = Page {
-			template_name: template_and_data_file_name,
-			data: data,
-			generate_path: template_and_data_file_name,
-		};
-		self.pages.push(p);
-		Ok(())
-	}
-	//more advanced use
-	pub fn add(&mut self, template_name: &'a str, data: &SerdeJson, generate_path: &'a str) {
-		let p = Page {
-			template_name: template_name,
-			data: data.clone(), //todo: way to avoid cloning data?
-			generate_path: generate_path,
-		};
-		self.pages.push(p);
-	}
-	pub fn load_data(
-		&self,
-		data_path: &str,
-		data_format: DataFormat,
-	) -> Result<SerdeJson, Box<Error>> {
-		//todo: toml
-		data::load_json(self.config.data_folder_path, data_path)
-	}
+    /// Create new wrapper with custom config.
+    pub fn new(config: Config<'a>) -> Slime<'a> {
+        Slime { config: config }
+    }
+
+    /// Load json data from data folder.
+    /// Data file needs to has ".json" extension suffix!
+    /// Filename passed as argument needs to be without extension
+    pub fn load_json_data(&self, file_name: &str) -> Result<SerdeJson, Box<Error>> {
+        data::load_json(self.config.data_path, file_name)
+    }
+
+    /// Load toml data from data folder. Same rules apply as in load_json_data.
+    pub fn load_toml_data(&self, file_name: &str) -> Result<Toml, Box<Error>> {
+        data::load_toml(self.config.data_path, file_name)
+    }
+
+    /// Generate html page.
+    pub fn generate<T: Serialize>(
+        &self,
+        template: &str,
+        file_name: &str,
+        data: &T,
+    ) -> Result<(), Box<Error>> {
+        let hb = template::load_all(&self.config).unwrap();
+        html::generate(&hb, template, data, self.config.generated_path, file_name)?;
+        Ok(())
+    }
 }
+
+impl<'a> Default for Slime<'a> {
+    fn default() -> Slime<'a> {
+        Slime::new(Config::default())
+    }
+}
+
+/// Folders paths config file.
 pub struct Config<'a> {
-	data_folder_path: &'a str,
-	generated_files_path: &'a str,
-	templates_path: &'a str,
+    data_path: &'a str,
+    generated_path: &'a str,
+    templates_path: &'a str,
 }
 
 impl<'a> Config<'a> {
-	pub fn default() -> Config<'a> {
-		Config {
-			data_folder_path: "data",
-			generated_files_path: "generated",
-			templates_path: "templates",
-		}
-	}
-	pub fn new(data_path: &'a str, generated_path: &'a str, templates_path: &'a str) -> Config<'a> {
-		Config {
-			data_folder_path: data_path,
-			generated_files_path: generated_path,
-			templates_path: templates_path,
-		}
-	}
+    pub fn new(data_path: &'a str, generated_path: &'a str, templates_path: &'a str) -> Config<'a> {
+        Config {
+            data_path: data_path,
+            generated_path: generated_path,
+            templates_path: templates_path,
+        }
+    }
+}
+
+impl<'a> Default for Config<'a> {
+    fn default() -> Config<'a> {
+        Config {
+            data_path: "data",
+            generated_path: "generated",
+            templates_path: "templates",
+        }
+    }
 }

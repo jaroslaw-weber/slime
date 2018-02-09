@@ -1,0 +1,3 @@
+title = "Website example"
+list_title = "Letters:"
+list = ["a", "b", "c"]
