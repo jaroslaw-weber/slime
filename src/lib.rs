@@ -3,14 +3,19 @@ extern crate handlebars;
 extern crate serde;
 extern crate serde_json;
 extern crate toml;
+#[macro_use]
+extern crate failure;
+
 use serde_json::value::Value as SerdeJson;
-use std::error::Error;
 use toml::Value as Toml;
 use serde::ser::Serialize;
+use handlebars::Handlebars;
+use failure::Error;
 
 pub mod template;
 pub mod data;
-pub mod html;
+pub mod generate;
+
 
 /// Rust library for fast prototyping and creating static websites.
 /// Use handlebars to handle html parts.
@@ -30,38 +35,63 @@ pub mod html;
 /// Wrapper for creating a static websites.
 /// Load templates and helps with loading and inserting data into templates.
 pub struct Slime<'a> {
+    /// cached config
     config: Config<'a>,
+    /// cached templates
+    templates: Option<Handlebars>,
 }
 
 impl<'a> Slime<'a> {
     /// Create new wrapper with custom config.
     pub fn new(config: Config<'a>) -> Slime<'a> {
-        Slime { config: config }
+        Slime {
+            config: config,
+            templates: None,
+        }
+    }
+
+    /// Load templates (need to run only once)
+    pub fn initialize(&mut self) -> Result<(), Error> {
+        let hb: Handlebars = template::load_all(&self.config)?;
+        self.templates = Some(hb);
+        Ok(())
     }
 
     /// Load json data from data folder.
-    /// Data file needs to has ".json" extension suffix!
-    /// Filename passed as argument needs to be without extension
-    pub fn load_json_data(&self, file_name: &str) -> Result<SerdeJson, Box<Error>> {
+    /// Default file extension is ".json" if not specified.
+    pub fn load_json_data(&self, file_name: &str) -> Result<SerdeJson, Error> {
         data::load_json(self.config.data_path, file_name)
     }
 
-    /// Load toml data from data folder. Same rules apply as in load_json_data.
-    pub fn load_toml_data(&self, file_name: &str) -> Result<Toml, Box<Error>> {
+    /// Load toml data from data folder. 
+    /// Default file extension is ".toml" if not specified.
+    pub fn load_toml_data(&self, file_name: &str) -> Result<Toml, Error> {
         data::load_toml(self.config.data_path, file_name)
     }
 
-    /// Generate html page.
+
+    /// Generate file. If filename has no extension then default extension is added (.html)
     pub fn generate<T: Serialize>(
         &self,
         template: &str,
         file_name: &str,
         data: &T,
-    ) -> Result<(), Box<Error>> {
-        let hb = template::load_all(&self.config).unwrap();
-        html::generate(&hb, template, data, self.config.generated_path, file_name)?;
-        Ok(())
+    ) -> Result<(), Error> {
+        match &self.templates {
+            &Some(ref hb) => {
+                generate::generate(
+                    &hb,
+                    template,
+                    data,
+                    self.config.generated_path,
+                    file_name,
+                )?;
+                Ok(())
+            }
+            &None => bail!("templates not loaded! use Slime::initialize()"),
+        }
     }
+
 }
 
 impl<'a> Default for Slime<'a> {
@@ -87,6 +117,7 @@ impl<'a> Config<'a> {
     }
 }
 
+/// Default folder paths (working with installation script)
 impl<'a> Default for Config<'a> {
     fn default() -> Config<'a> {
         Config {
@@ -94,5 +125,20 @@ impl<'a> Default for Config<'a> {
             generated_path: "generated",
             templates_path: "templates",
         }
+    }
+}
+
+/// does filename has extension in it?
+fn has_ext(file_name: &str)-> bool
+{
+    file_name.contains(".")
+}
+
+fn get_filename_with_ext(file_name: &str, extension: &str) -> String
+{
+    match has_ext(file_name)
+    {
+        true => file_name.to_string(),
+        false => format!("{}.{}", file_name, extension)
     }
 }

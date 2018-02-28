@@ -58,6 +58,8 @@ fn main() {
     //create new wrapper
     let s = Slime::default();
 
+    s.initialize()
+
     //load data
     let data1 = s.load_json_data("data1").expect("failed to load json data");
     let data2 = s.load_toml_data("data2").expect("failed to load toml data");
@@ -78,6 +80,10 @@ let mut s = Slime::default();
 ```
 Create new wrapper.
 
+```
+s.initialize()
+```
+Load templates.
 
 ```
 let data1 = s.load_json_data("data1").expect("failed to load json data");
@@ -87,19 +93,15 @@ Load some toml/json data from data folder.
 
 
 ```
-s.generate("index", "json_version", &data1)
+s.generate_html("index", "json_version", &data1)
     .expect("failed to generate page with json data");
-s.generate("index", "toml_version", &data2)
+s.generate_html("index", "toml_version", &data2)
     .expect("failed to generate page with toml data");
 ```
 Generate html files.
 
-
-## New features
-- installation script
-- reading toml files
-- simpler api
-- toml format
+# What is new?
+Check out CHANGELOG.md file!
 
 ## So what next?
 - [ ] slime binary mode (using slime library without writing rust code)
@@ -110,12 +112,16 @@ Generate html files.
 - [ ] write tutorial
 - [ ] add links to projects using slime to README file
 - [ ] add more examples
-- [ ] add toml -> json conversion
 - [ ] improve installation script
+- [ ] adding custom helpers for handlebars
 
-## Binary mode
+## Projects using Slime
+- https://github.com/jaroslaw-weber/cbt-diary
+- https://github.com/jaroslaw-weber/jaroslaw-weber.github
+- https://github.com/fishlang/fishlang
+
+## Binary mode (not implemented)
 Generating page without writing rust code.
-(todo: not implemented yet)
 
 Install slime with
 ```

@@ -3,7 +3,10 @@ use slime::Slime;
 
 fn main() {
     //create new wrapper
-    let s = Slime::default();
+    let mut s = Slime::default();
+
+    //load templates
+    s.initialize().expect("failed to initialize slime");
 
     //load data
     let data1 = s.load_json_data("data1").expect("failed to load json data");
