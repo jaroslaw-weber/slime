@@ -3,6 +3,7 @@ echo "creating necessary folders"
 mkdir data
 mkdir generated
 mkdir templates
+mkdir static
 # get deploying script
 wget "https://raw.githubusercontent.com/jaroslaw-weber/slime/master/deploy_scripts/deploy_template.sh" 
 mv "deploy_template.sh" "deploy.sh"

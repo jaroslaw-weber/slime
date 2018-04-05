@@ -1,3 +1,7 @@
+# v 0.4.1
+- copying files from "static" folder to "generated" (css/javascript/images)
+- updated dependencies
+
 # v 0.4.0
 - generate files other than html (can use for code generation)
 - cache templates

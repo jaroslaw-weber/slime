@@ -1,10 +1,10 @@
+#[macro_use]
+extern crate failure;
 extern crate fs_extra;
 extern crate handlebars;
 extern crate serde;
 extern crate serde_json;
 extern crate toml;
-#[macro_use]
-extern crate failure;
 
 use serde_json::value::Value as SerdeJson;
 use toml::Value as Toml;
@@ -15,7 +15,6 @@ use failure::Error;
 pub mod template;
 pub mod data;
 pub mod generate;
-
 
 /// Rust library for fast prototyping and creating static websites.
 /// Use handlebars to handle html parts.
@@ -63,12 +62,11 @@ impl<'a> Slime<'a> {
         data::load_json(self.config.data_path, file_name)
     }
 
-    /// Load toml data from data folder. 
+    /// Load toml data from data folder.
     /// Default file extension is ".toml" if not specified.
     pub fn load_toml_data(&self, file_name: &str) -> Result<Toml, Error> {
         data::load_toml(self.config.data_path, file_name)
     }
-
 
     /// Generate file. If filename has no extension then default extension is added (.html)
     pub fn generate<T: Serialize>(
@@ -79,19 +77,20 @@ impl<'a> Slime<'a> {
     ) -> Result<(), Error> {
         match &self.templates {
             &Some(ref hb) => {
-                generate::generate(
-                    &hb,
-                    template,
-                    data,
-                    self.config.generated_path,
-                    file_name,
-                )?;
+                generate::generate(&hb, template, data, self.config.generated_path, file_name)?;
                 Ok(())
             }
             &None => bail!("templates not loaded! use Slime::initialize()"),
         }
     }
 
+    /// Copy files from "static" folder to "generated" folder
+    /// Using for copying javascript/image files after generation.
+    pub fn copy_static_files(&self) -> Result<(), Error> {
+        let options = fs_extra::dir::CopyOptions::new();
+        fs_extra::dir::copy(self.config.static_path, self.config.generated_path, &options)?;
+        Ok(())
+    }
 }
 
 impl<'a> Default for Slime<'a> {
@@ -105,14 +104,21 @@ pub struct Config<'a> {
     data_path: &'a str,
     generated_path: &'a str,
     templates_path: &'a str,
+    static_path: &'a str,
 }
 
 impl<'a> Config<'a> {
-    pub fn new(data_path: &'a str, generated_path: &'a str, templates_path: &'a str) -> Config<'a> {
+    pub fn new(
+        data_path: &'a str,
+        generated_path: &'a str,
+        templates_path: &'a str,
+        static_path: &'a str,
+    ) -> Config<'a> {
         Config {
             data_path: data_path,
             generated_path: generated_path,
             templates_path: templates_path,
+            static_path: static_path,
         }
     }
 }
@@ -124,21 +130,19 @@ impl<'a> Default for Config<'a> {
             data_path: "data",
             generated_path: "generated",
             templates_path: "templates",
+            static_path: "static",
         }
     }
 }
 
 /// does filename has extension in it?
-fn has_ext(file_name: &str)-> bool
-{
+fn has_ext(file_name: &str) -> bool {
     file_name.contains(".")
 }
 
-fn get_filename_with_ext(file_name: &str, extension: &str) -> String
-{
-    match has_ext(file_name)
-    {
+fn get_filename_with_ext(file_name: &str, extension: &str) -> String {
+    match has_ext(file_name) {
         true => file_name.to_string(),
-        false => format!("{}.{}", file_name, extension)
+        false => format!("{}.{}", file_name, extension),
     }
 }
