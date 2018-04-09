@@ -23,11 +23,13 @@ pub mod generate;
 
 /// Creating new project:
 /// Create new binary crate with
-/// ```
+/// ```ignore
 /// cargo new --bin crate_name
 /// ```
 /// Open crate folder and run
+/// ```ignore
 /// curl -s https://raw.githubusercontent.com/jaroslaw-weber/slime/master/init_slime.sh | bash
+/// ```
 /// This will download deployment scripts and create some folders.
 /// It will also create example files.
 
